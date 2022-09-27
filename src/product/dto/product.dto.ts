@@ -14,7 +14,7 @@ export class ProductDto {
   @IsNotEmpty()
   description: string;
 
-  @IsString()
+  @IsBoolean()
   @IsNotEmpty()
   isSold: boolean;
 }

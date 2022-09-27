@@ -12,7 +12,14 @@ export class ProductService {
   ) {}
 
   //Method to create Function
-  Create(dto: ProductDto) {
-    return { message: "I'M Created" };
+  async Create(dto: ProductDto) {
+    const product = await this.productRepository.save(dto);
+    return { product };
+  }
+
+  async FetchAll(): Promise<{ products: Product[] }> {
+    const products = await this.productRepository.find();
+
+    return { products };
   }
 }
