@@ -1,12 +1,12 @@
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { Auth } from './auth/auth.entity';
 import { Product } from './product/product.entity';
-require('dotenv').config();
+import { Env } from './configuration/config';
 
 export const config: TypeOrmModuleOptions = {
   type: 'postgres',
   username: 'postgres',
-  password: process.env.DATABASE_PASS,
+  password: Env.DatabasePassword,
   port: 5432,
   host: '127.0.0.1',
   database: 'postgres',

@@ -1,5 +1,5 @@
 // anotate with Controller Decorator so nest knows its a controller
-import { Controller, Post, Body } from '@nestjs/common';
+import { Controller, Post, Body, HttpCode, HttpStatus } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthDto } from './dto';
 
@@ -8,6 +8,7 @@ export class AuthController {
   //calling AuthService has a dependency injection in order to have acess to it while nest handles the instantiate
   constructor(private authService: AuthService) {}
 
+  @HttpCode(HttpStatus.ACCEPTED)
   @Post('signup')
   signup(@Body() dto: AuthDto) {
     return this.authService.Signup(dto);
