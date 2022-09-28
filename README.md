@@ -7,3 +7,7 @@ A user can perform crud operations for Products
 [x] TypeScript
 
 [x] PostgreSQL
+
+- Google Oauth20
+
+https://www.youtube.com/watch?v=OitgkKTxht4

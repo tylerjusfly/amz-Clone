@@ -5,6 +5,7 @@ import { UserModule } from './user/user.module';
 import { ProductModule } from './product/product.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { config } from './orm.config';
+import { PassportModule } from '@nestjs/passport';
 
 //import module here
 @Module({
@@ -16,6 +17,7 @@ import { config } from './orm.config';
     ConfigModule.forRoot({
       isGlobal: true,
     }),
+    PassportModule.register({ session: true }),
   ],
 })
 export class AppModule {}

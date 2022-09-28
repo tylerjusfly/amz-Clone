@@ -60,6 +60,24 @@ export class AuthService {
     return this.SignToken(user.id, user.email);
   }
 
+  async ValidateGoogleUser(email: string) {
+    //find User
+    const user = await this.authRepository.findOneBy({ email: email });
+
+    //if found return
+    if (user) return this.SignToken(user.id, user.email);
+    //else Create
+    const newUser = await this.authRepository.save({ email: email });
+
+    return this.SignToken(newUser.id, newUser.email);
+  }
+
+  // async findUser(id: number) {
+  //   const user = await this.authRepository.findOneBy({ id });
+
+  //   return user;
+  // }
+
   async SignToken(userId: number, email: string): Promise<{ access_token: string }> {
     const payload = {
       sub: userId,

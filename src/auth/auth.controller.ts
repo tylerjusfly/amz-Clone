@@ -1,7 +1,8 @@
 // anotate with Controller Decorator so nest knows its a controller
-import { Controller, Post, Body, HttpCode, HttpStatus } from '@nestjs/common';
+import { Controller, Post, Body, HttpCode, HttpStatus, Get, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthDto } from './dto';
+import { GoogleGuard } from './guard';
 
 @Controller('auth') /*return a Global prefix route */
 export class AuthController {
@@ -17,6 +18,12 @@ export class AuthController {
   @Post('signin')
   signin(@Body() dto: AuthDto) {
     return this.authService.Login(dto);
+  }
+
+  @UseGuards(GoogleGuard)
+  @Get('google')
+  GoogleAuth() {
+    return { message: 'Google Auth Init' };
   }
 }
 
