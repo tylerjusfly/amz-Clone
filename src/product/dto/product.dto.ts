@@ -1,10 +1,10 @@
-import { IsString, IsNotEmpty, IsBoolean } from 'class-validator';
-import { ProductTypes } from '../product.entity';
+import { IsString, IsNotEmpty, IsBoolean, IsNumber } from 'class-validator';
+import { ProductTypes } from '../entity/product.entity';
 
 export class ProductDto {
   @IsString()
   @IsNotEmpty()
-  productName: string;
+  name: string;
 
   @IsString()
   @IsNotEmpty()
@@ -16,5 +16,17 @@ export class ProductDto {
 
   @IsBoolean()
   @IsNotEmpty()
-  isSold: boolean;
+  isAvailable: boolean;
+
+  @IsString()
+  @IsNotEmpty()
+  brand: string;
+
+  @IsString()
+  @IsNotEmpty()
+  color: string;
+
+  @IsNumber()
+  @IsNotEmpty()
+  unitCount: number;
 }

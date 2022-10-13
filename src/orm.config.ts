@@ -1,6 +1,6 @@
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { Auth } from './auth/auth.entity';
-import { Product } from './product/product.entity';
+import { Product } from './product/entity/product.entity';
 import { Env } from './configuration/config';
 
 export const config: TypeOrmModuleOptions = {

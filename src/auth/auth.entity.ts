@@ -8,4 +8,7 @@ export class Auth extends BaseEntity {
 
   @Column({ type: 'text', nullable: true })
   password: string;
+
+  @Column({ type: 'text', nullable: true })
+  bitconWallet: string;
 }

@@ -1,14 +1,18 @@
-version: '3.8'
+version: '3.4'
+
 services:
-  dev-db:
-    image: postgres:13
-    ports:
-      - 5434:5432
+  postgres:
+    image: postgres:12-alpine
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: 123456
-      POSTGRES_DB: nest
-    networks:
-      - freecodecamp
-networks:
-  freecodecamp:
+      POSTGRES_PASSWORD: password
+      POSTGRES_USERNAME: postgres
+      POSTGRES_DB: amzclone
+    ports:
+      - 5432:5432
+  adminer:
+    image: adminer
+    restart: always
+    depends_on:
+      - postgres
+    ports:
+      - 8080:8080

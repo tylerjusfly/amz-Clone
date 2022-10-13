@@ -1,0 +1,7 @@
+Create Product Category
+    add slug
+    admin can create Category
+Create Product Endpoint
+    Get Product
+    Edit Product
+    Delete Product
