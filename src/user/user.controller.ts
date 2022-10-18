@@ -1,10 +1,12 @@
 import { Controller, Get, Req, UseGuards } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 import { Auth } from '../auth/auth.entity';
 import { GetUser } from '../auth/decorators';
 import { JwtGuard, GoogleGuard } from '../auth/guard';
 
 /*You can use the UseGuard decorator at a Global Level or at a Route Level */
 
+@ApiTags('users')
 @Controller('users') /* The Controller decorator Registers a class as a controller */
 export class UserController {
   @UseGuards(JwtGuard)
@@ -13,7 +15,7 @@ export class UserController {
     return user;
   }
 
-  // Google Redirect EndPoint
+  // Google Redirects to this EndPoint and return a token
   @UseGuards(GoogleGuard)
   @Get('profile')
   HandleRedirect(@GetUser() user: Auth) {
