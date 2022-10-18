@@ -1,32 +1,39 @@
+import { ApiProperty } from '@nestjs/swagger';
 import { IsString, IsNotEmpty, IsBoolean, IsNumber } from 'class-validator';
-import { ProductTypes } from '../entity/product.entity';
 
 export class ProductDto {
   @IsString()
   @IsNotEmpty()
+  @ApiProperty()
   name: string;
 
   @IsString()
   @IsNotEmpty()
-  productType: ProductTypes;
+  @ApiProperty()
+  productType: string;
 
   @IsString()
   @IsNotEmpty()
+  @ApiProperty()
   description: string;
 
   @IsBoolean()
   @IsNotEmpty()
+  @ApiProperty()
   isAvailable: boolean;
 
   @IsString()
   @IsNotEmpty()
+  @ApiProperty()
   brand: string;
 
   @IsString()
   @IsNotEmpty()
+  @ApiProperty()
   color: string;
 
   @IsNumber()
   @IsNotEmpty()
+  @ApiProperty()
   unitCount: number;
 }

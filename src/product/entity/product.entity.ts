@@ -1,9 +1,10 @@
 import { Column, Entity } from 'typeorm';
 import { BaseEntity } from '../../base-entity'; /**import base Entity class for DRY Code */
+import { ApiProperty } from '@nestjs/swagger';
 
 @Entity('products') /* Strictly mentioning the name of the table */
 export class Product extends BaseEntity {
-  @Column({ type: 'varchar', length: 100, nullable: false })
+  @Column({ type: 'varchar', length: 100 })
   name: string;
 
   @Column({ type: 'varchar', nullable: false })
