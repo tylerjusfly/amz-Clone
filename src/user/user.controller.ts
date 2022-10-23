@@ -1,5 +1,5 @@
 import { Controller, Get, Req, UseGuards } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiExcludeEndpoint, ApiTags } from '@nestjs/swagger';
 import { Auth } from '../auth/auth.entity';
 import { GetUser } from '../auth/decorators';
 import { JwtGuard, GoogleGuard } from '../auth/guard';
@@ -16,6 +16,7 @@ export class UserController {
   }
 
   // Google Redirects to this EndPoint and return a token
+  @ApiExcludeEndpoint()
   @UseGuards(GoogleGuard)
   @Get('profile')
   HandleRedirect(@GetUser() user: Auth) {
