@@ -5,11 +5,11 @@ import { Env } from './configuration/config';
 
 export const config: TypeOrmModuleOptions = {
   type: 'postgres',
-  username: 'postgres',
+  username: process.env.DATABASE_USER,
   password: Env.DatabasePassword,
   port: 5432,
-  host: '127.0.0.1',
-  database: 'postgres',
+  host: process.env.DATABASE_HOST,
+  database: process.env.DATABASE_DATABASE,
   synchronize: true,
   entities: [Auth, Product],
 };
