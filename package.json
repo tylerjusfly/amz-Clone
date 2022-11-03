@@ -20,8 +20,7 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --watch --no-cache --config ./test/jest-e2e.json",
-    "migration:generate": "npx typeorm migration:generate -n",
-    "migration-generate": "npm run typeorm --migration:generate -n"
+    "migration:generate": "typeorm migration:create ./src/database/migration"
   },
   "dependencies": {
     "@nestjs/common": "^9.0.0",
