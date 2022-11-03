@@ -6,4 +6,7 @@ Create Product Endpoint
     Edit Product
     Delete Product
 
-Connect Swagger API DOcumenter
+create a db to add category of product
+
+product type = 1 - many product table
+media table = many - 1 product table

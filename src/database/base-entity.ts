@@ -1,7 +1,7 @@
 import { PrimaryGeneratedColumn, CreateDateColumn } from 'typeorm';
 
 export class BaseEntity {
-  @PrimaryGeneratedColumn('uuid')
+  @PrimaryGeneratedColumn()
   id: number; /** Auto Increment */
 
   @CreateDateColumn({ nullable: true })

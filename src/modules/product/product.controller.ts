@@ -2,6 +2,7 @@ import { Controller, Post, Get, Body, HttpCode, HttpStatus } from '@nestjs/commo
 import { ProductService } from './product.service';
 import { ProductDto } from './dto';
 import { ApiTags } from '@nestjs/swagger';
+import { ProductCategory } from './dto/productCategory';
 
 @ApiTags('products')
 @Controller('products')
@@ -19,5 +20,11 @@ export class ProductController {
   @Get('all')
   GetAllProducts() {
     return this.productService.FetchAll();
+  }
+
+  /**ADMINN FUNCTIONS */
+  @Post('category/create')
+  CreateCategory(@Body() dto: ProductCategory) {
+    return this.productService.createProductCategory(dto);
   }
 }

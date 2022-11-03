@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsNotEmpty, IsBoolean, IsNumber } from 'class-validator';
+import { IsString, IsNotEmpty, IsBoolean, IsNumber, IsArray } from 'class-validator';
+import { MediaEntity } from 'src/database';
 
 export class ProductDto {
   @IsString()
@@ -10,7 +11,7 @@ export class ProductDto {
   @IsString()
   @IsNotEmpty()
   @ApiProperty()
-  productType: string;
+  productCategory: string;
 
   @IsString()
   @IsNotEmpty()
@@ -36,4 +37,7 @@ export class ProductDto {
   @IsNotEmpty()
   @ApiProperty()
   unitCount: number;
+
+  @IsArray()
+  image: string[];
 }

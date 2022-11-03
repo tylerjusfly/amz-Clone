@@ -1,14 +1,13 @@
-import { Column, Entity } from 'typeorm';
-import { BaseEntity } from '../../base-entity'; /**import base Entity class for DRY Code */
-import { ApiProperty } from '@nestjs/swagger';
+import { Column, Entity, OneToMany } from 'typeorm';
+import { BaseEntity, MediaEntity } from '../../../database'; /**import base Entity class for DRY Code */
 
 @Entity('products') /* Strictly mentioning the name of the table */
 export class Product extends BaseEntity {
-  @Column({ type: 'varchar', length: 100 })
+  @Column({ type: 'varchar', nullable: true })
   name: string;
 
-  @Column({ type: 'varchar', nullable: false })
-  productType: string;
+  @Column({ type: 'varchar' })
+  productCategory: string;
 
   @Column({ type: 'varchar', nullable: false })
   brand: string;
@@ -27,4 +26,7 @@ export class Product extends BaseEntity {
 
   @Column({ type: 'integer', nullable: false })
   unitCount: number;
+
+  @OneToMany(() => MediaEntity, (images) => images.product, { cascade: true })
+  images: MediaEntity[];
 }
