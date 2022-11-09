@@ -38,6 +38,8 @@ export class ProductDto {
   @ApiProperty()
   unitCount: number;
 
+  // @IsArray()
+  // images: MediaEntity;
   @IsArray()
-  image: string[];
+  images: MediaEntity[];
 }

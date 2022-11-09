@@ -23,6 +23,7 @@
     "migration:generate": "typeorm migration:create ./src/database/migration"
   },
   "dependencies": {
+    "@nestjs-modules/mailer": "^1.8.1",
     "@nestjs/common": "^9.0.0",
     "@nestjs/config": "^2.2.0",
     "@nestjs/core": "^9.0.0",
@@ -36,6 +37,8 @@
     "class-validator": "^0.13.2",
     "dotenv": "^16.0.2",
     "express-session": "^1.17.3",
+    "handlebars": "^4.7.7",
+    "nodemailer": "^6.8.0",
     "passport": "^0.6.0",
     "passport-google-oauth20": "^2.0.0",
     "passport-jwt": "^4.0.0",
@@ -53,6 +56,7 @@
     "@types/express-session": "^1.17.5",
     "@types/jest": "28.1.8",
     "@types/node": "^16.0.0",
+    "@types/nodemailer": "^6.4.6",
     "@types/passport-google-oauth20": "^2.0.11",
     "@types/passport-jwt": "^3.0.6",
     "@types/supertest": "^2.0.11",

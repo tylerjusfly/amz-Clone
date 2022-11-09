@@ -27,6 +27,9 @@ export class Product extends BaseEntity {
   @Column({ type: 'integer', nullable: false })
   unitCount: number;
 
-  @OneToMany(() => MediaEntity, (images) => images.product, { cascade: true })
-  images: MediaEntity[];
+  @OneToMany(() => MediaEntity, (images: MediaEntity) => images.product, { cascade: true })
+  medias: MediaEntity[];
+
+  @Column({ type: 'integer', nullable: false })
+  userId: number;
 }

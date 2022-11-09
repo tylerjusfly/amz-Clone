@@ -16,7 +16,11 @@ export class MediaEntity extends BaseEntity {
   @Column({ type: 'varchar' })
   mediaCategory: string;
 
-  // @JoinColumn({ name: 'productid', referencedColumnName: 'id' })
-  @ManyToOne(() => Product, (product) => product.images, { onDelete: 'CASCADE' })
+  //Many Pictures Belongs to One Product
+  @ManyToOne(() => Product, (product: Product) => product.medias, { onDelete: 'CASCADE', onUpdate: 'CASCADE', nullable: true })
+  /*JoinColumn is used to create a custom Column Name */
+  @JoinColumn({ name: 'product_id' })
   product: Product;
+
+  //we will have a productId refrencing the Product Entity
 }

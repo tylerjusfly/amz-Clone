@@ -9,6 +9,7 @@ import { AuthDto } from './dto';
 import * as argon from 'argon2'; /* package for hashing passwords*/
 import { Auth } from './auth.entity';
 import { ConfigService } from '@nestjs/config';
+import { MailService } from 'src/mail/mail.service';
 
 //dependency Injection
 @Injectable()
@@ -17,6 +18,7 @@ export class AuthService {
     @InjectRepository(Auth) private authRepository: Repository<Auth>,
     private jwt: JwtService,
     private config: ConfigService,
+    private mailService: MailService,
   ) {}
 
   async Signup(dto: AuthDto) {
@@ -32,6 +34,9 @@ export class AuthService {
 
       //and return user
       delete user.password;
+
+      //send mail
+      await this.mailService.sendConfirmEmail(user.email);
 
       return this.SignToken(user.id, user.email);
     } catch (error) {

@@ -7,6 +7,7 @@ import { ProductDto } from './dto';
 import { ProductCategory } from './dto/productCategory';
 import { Product } from './entity/product.entity';
 import { ProductCategoryDb } from './entity/productcategory.entity';
+import { PaginationOptionsInterface } from '../../common/pagination.options.interface';
 
 @Injectable()
 export class ProductService {
@@ -20,7 +21,7 @@ export class ProductService {
   ) {}
 
   //Method to create Function
-  async Create(dto: ProductDto) {
+  async Create(dto: ProductDto, id: number) {
     try {
       //check if Category Exists, save category name
       const existingCategory = await this.productCategoryRepository.findOneBy({ id: +dto.productCategory });
@@ -29,9 +30,29 @@ export class ProductService {
         throw new ForbiddenException({ type: 'Error', message: `Category Not Found` });
       }
 
-      return { dto: dto };
+      if (dto.images.length !== 5) {
+        throw new ForbiddenException({ type: 'Error', message: `5 Images are Required to Create A Product` });
+      }
 
-      const product = await this.productRepository.save({ ...dto, productCategory: existingCategory.name });
+      //Create Product
+      const product = await this.productRepository.save({
+        ...dto,
+        productCategory: existingCategory.name,
+        userId: id,
+      });
+
+      for (let i = 0; i < dto.images.length; i++) {
+        await this.mediaRepository
+          .createQueryBuilder()
+          .insert()
+          .into(MediaEntity)
+          .values({
+            ...dto.images[i],
+            mediaCategory: 'PRODUCTS',
+            product: product,
+          })
+          .execute();
+      }
 
       return { type: 'Success', message: 'successfully Created', product };
     } catch (error) {
@@ -42,8 +63,31 @@ export class ProductService {
   async FetchAll() {
     try {
       const products = await this.productRepository.find();
+      //Pagination
+      // const [result, total] = await this.productRepository.findAndCount({
+      //   relations: { medias: true },
+      //   take: limit,
+      //   skip: offset,
+      //   order: { createdAt: 'DESC' },
+      // });
 
+      // return {
+      //   type: 'Success',
+      //   result,
+      //   Pages: Math.ceil(total / limit),
+      //   itemsPerPage: limit,
+      //   total: total,
+      //   currentPage: page ? page : 1,
+      // };
       return { type: 'Success', products };
+    } catch (error) {
+      return { type: 'Error', message: error.message };
+    }
+  }
+
+  /**Fetch Single Product By ID */
+  async FindOne(id: number) {
+    try {
     } catch (error) {
       return { type: 'Error', message: error.message };
     }
