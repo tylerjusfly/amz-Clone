@@ -1,4 +1,4 @@
-import { Injectable, ForbiddenException } from '@nestjs/common';
+import { Injectable, ForbiddenException, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { convertToSlug } from 'src/common/utils';
 import { MediaEntity } from 'src/database';
@@ -7,7 +7,7 @@ import { ProductDto } from './dto';
 import { ProductCategory } from './dto/productCategory';
 import { Product } from './entity/product.entity';
 import { ProductCategoryDb } from './entity/productcategory.entity';
-import { PaginationOptionsInterface } from '../../common/pagination.options.interface';
+import { PaginationInterface } from '../../common/pagination.dto';
 
 @Injectable()
 export class ProductService {
@@ -60,26 +60,37 @@ export class ProductService {
     }
   }
 
-  async FetchAll() {
+  async FetchAll(params: PaginationInterface) {
     try {
-      const products = await this.productRepository.find();
-      //Pagination
-      // const [result, total] = await this.productRepository.findAndCount({
-      //   relations: { medias: true },
-      //   take: limit,
-      //   skip: offset,
-      //   order: { createdAt: 'DESC' },
-      // });
+      //converting values to number, and cross Checking if Number
+      let { page, limit } = params;
 
-      // return {
-      //   type: 'Success',
-      //   result,
-      //   Pages: Math.ceil(total / limit),
-      //   itemsPerPage: limit,
-      //   total: total,
-      //   currentPage: page ? page : 1,
-      // };
-      return { type: 'Success', products };
+      page = Number(page) ? +page : 1;
+      limit = +limit ? +limit : 10;
+
+      const take = Number(limit);
+
+      const offset = (page - 1) * Number(limit);
+
+      //create Query to get many products , orderBy DESC
+      const query = this.productRepository.createQueryBuilder('products');
+
+      query.orderBy('products.createdAt', 'DESC').take(take).skip(offset);
+
+      //Get count of products
+      const total = await query.getCount();
+      const products = await query.getMany();
+
+      if (!products) return { type: 'Error', message: 'products Not found' };
+
+      return {
+        tyoe: 'Success',
+        result: products,
+        totalPages: Math.ceil(total / take),
+        itemsPerPage: limit,
+        totalItems: total,
+        currentPage: page,
+      };
     } catch (error) {
       return { type: 'Error', message: error.message };
     }
@@ -88,6 +99,13 @@ export class ProductService {
   /**Fetch Single Product By ID */
   async FindOne(id: number) {
     try {
+      const product = await this.productRepository.findOneBy({ id: id });
+
+      if (!product) {
+        throw new NotFoundException({ type: 'Error', message: `product with id ${id} does not exist` });
+      }
+
+      return product;
     } catch (error) {
       return { type: 'Error', message: error.message };
     }

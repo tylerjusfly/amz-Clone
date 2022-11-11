@@ -1,11 +1,11 @@
 import { Controller, Post, Get, Body, HttpCode, HttpStatus, Query, UseGuards } from '@nestjs/common';
 import { ProductService } from './product.service';
 import { ProductDto } from './dto';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiParam, ApiTags } from '@nestjs/swagger';
 import { ProductCategory } from './dto/productCategory';
 import { JwtGuard } from '../auth/guard';
 import { GetUser } from '../auth/decorators';
-import { PaginationOptionsInterface } from '../../common/pagination.options.interface';
+import { PaginationInterface } from '../../common/pagination.dto';
 import { Auth } from '../auth/auth.entity';
 
 @ApiTags('products')
@@ -23,11 +23,18 @@ export class ProductController {
 
   @HttpCode(HttpStatus.OK)
   @Get('all')
-  GetAllProducts(@Query() params: PaginationOptionsInterface) {
+  @ApiParam({ name: 'page', description: 'Gets the page number' })
+  @ApiParam({ name: 'limit', description: 'Gets limit per page' })
+  GetAllProducts(@Query() urlParams) {
     // const limit = params.limit ? +params.limit : 4;
     // const offset = params.page ? params.page - 1 * limit : 0;
 
-    return this.productService.FetchAll();
+    return this.productService.FetchAll(urlParams);
+  }
+
+  @Get('one')
+  GetOneProduct(@Query() { id }) {
+    return this.productService.FindOne(id);
   }
 
   /**ADMINN FUNCTIONS */

@@ -1,12 +1,5 @@
-Create Product Category
-    add slug
-    admin can create Category
+
 Create Product Endpoint
-    Get Product
-    Edit Product
     Delete Product
 
-create a db to add category of product
-
-product type = 1 - many product table
-media table = many - 1 product table
+Chat SYSTEM WITH ADMIN , USERS
