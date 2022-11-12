@@ -11,6 +11,16 @@ async function bootstrap() {
   app.useGlobalPipes(new ValidationPipe({ whitelist: true })); /*white list strips out element that are not in our DTO*/
 
   //for google Auth Implementation
+
+  const corsOption = {
+    origin: 'localhost:3000',
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    //preflightContinue: false,
+    optionsSuccessStatus: 200,
+  };
+
+  app.enableCors(corsOption);
+
   app.use(
     session({
       secret: Env.SecretKey,
@@ -35,6 +45,10 @@ async function bootstrap() {
 
   SwaggerModule.setup('api', app, document);
 
-  await app.listen(process.env.PORT || 4000);
+  const port = process.env.PORT || 4000;
+
+  await app.listen(port, async () => {
+    console.info(`AMZcl API running on: ${await app.getUrl()}`);
+  });
 }
 bootstrap();

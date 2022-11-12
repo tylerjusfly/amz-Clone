@@ -6,6 +6,7 @@ import { ProductModule } from './modules/product/product.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { config } from './database/orm.config';
 import { PassportModule } from '@nestjs/passport';
+import { AppController } from './app.controller';
 
 //import module here
 @Module({
@@ -19,6 +20,7 @@ import { PassportModule } from '@nestjs/passport';
     }),
     PassportModule.register({ session: true }),
   ],
+  controllers: [AppController],
 })
 export class AppModule {}
 
