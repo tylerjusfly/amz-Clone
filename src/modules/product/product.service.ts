@@ -84,7 +84,7 @@ export class ProductService {
       if (!products) return { type: 'Error', message: 'products Not found' };
 
       return {
-        tyoe: 'Success',
+        type: 'Success',
         result: products,
         totalPages: Math.ceil(total / take),
         itemsPerPage: limit,

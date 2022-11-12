@@ -13,13 +13,11 @@ async function bootstrap() {
   //for google Auth Implementation
 
   const corsOption = {
-    origin: 'localhost:3000',
+    origin: '*',
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-    //preflightContinue: false,
-    optionsSuccessStatus: 200,
   };
 
-  app.enableCors(corsOption);
+  app.enableCors({ origin: true });
 
   app.use(
     session({
