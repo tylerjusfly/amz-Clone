@@ -39,6 +39,7 @@ export class ProductService {
         ...dto,
         productCategory: existingCategory.name,
         userId: id,
+        //medias: dto.images,
       });
 
       for (let i = 0; i < dto.images.length; i++) {

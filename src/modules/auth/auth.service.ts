@@ -1,7 +1,7 @@
 // service are used to handle business Logic, conneting to db , editing fields
 // uses The Injectable NestJs uses Under the hood
 
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import { ForbiddenException, HttpException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { QueryFailedError, Repository } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
@@ -38,14 +38,15 @@ export class AuthService {
       //send mail
       await this.mailService.sendConfirmEmail(user.email);
 
-      return this.SignToken(user.id, user.email);
+      return this.SignToken(user, user.email);
     } catch (error) {
       if (error instanceof QueryFailedError) {
         if (error.driverError.code === '23505') {
-          throw new ForbiddenException('Credentials Taken');
+          return { type: 'Error', message: 'Credentials Taken' };
         }
       }
-      throw error;
+      //throw error;
+      return { type: 'Error', message: error.message };
     }
   }
 
@@ -53,16 +54,17 @@ export class AuthService {
     // find user By Email
     const user = await this.authRepository.findOneBy({ email: dto.email });
     //does not exist , throw execption
-    if (!user) throw new ForbiddenException('credentials Incorrect');
+    if (!user) return { type: 'Error', message: 'Incorrect Credentials' };
 
     //if exist , compare password
     const passMatch = await argon.verify(user.password, dto.password);
+
     //if password doesn't match , throw execption
-    if (!passMatch) throw new ForbiddenException('credentials Incorrect');
+    if (!passMatch) return { type: 'Error', message: 'Incorrect Credentials' };
 
     //if correct , send back users
 
-    return this.SignToken(user.id, user.email);
+    return this.SignToken(user, user.email);
   }
 
   async ValidateGoogleUser(email: string) {
@@ -70,11 +72,11 @@ export class AuthService {
     const user = await this.authRepository.findOneBy({ email: email });
 
     //if found return
-    if (user) return this.SignToken(user.id, user.email);
+    if (user) return this.SignToken(user, user.email);
     //else Create
     const newUser = await this.authRepository.save({ email: email });
 
-    return this.SignToken(newUser.id, newUser.email);
+    return this.SignToken(newUser, newUser.email);
   }
 
   // async findUser(id: number) {
@@ -83,9 +85,9 @@ export class AuthService {
   //   return user;
   // }
 
-  async SignToken(userId: number, email: string): Promise<{ success: boolean; access_token: string }> {
+  async SignToken(user: Auth, email: string) {
     const payload = {
-      sub: userId,
+      sub: user.id,
       email: email,
     };
 
@@ -96,6 +98,6 @@ export class AuthService {
       secret: secret,
     });
 
-    return { success: true, access_token: Token };
+    return { type: 'Success', access_token: Token, user };
   }
 }

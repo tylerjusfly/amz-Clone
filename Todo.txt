@@ -3,3 +3,12 @@ Create Product Endpoint
     Delete Product
 
 Chat SYSTEM WITH ADMIN , USERS
+
+
+Create Cart, then select all Product of carts that belongs to userid , create order,
+and delete data from cart
+
+
+create order, 
+send product ids , 
+search for products , create cart

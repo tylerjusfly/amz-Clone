@@ -10,5 +10,6 @@ import { MediaEntity } from 'src/database';
   imports: [TypeOrmModule.forFeature([Product, ProductCategoryDb, MediaEntity])],
   controllers: [ProductController],
   providers: [ProductService],
+  //exports: [Product],
 })
 export class ProductModule {}

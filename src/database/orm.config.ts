@@ -10,12 +10,12 @@ export const config: TypeOrmModuleOptions = {
   port: 5432,
   host: process.env.DATABASE_HOST,
   database: process.env.DATABASE_DATABASE,
-  ssl: {
-    require: true,
-    rejectUnauthorized: false,
-  },
+  // ssl: {
+  //   require: true,
+  //   rejectUnauthorized: false,
+  // },
   synchronize: true,
   autoLoadEntities: true,
-  entities: [__dirname + '/**/*.entity{ .ts,.js}'],
+  entities: [__dirname + 'src/**/*.entity{ .ts,.js}'],
   migrations: [__dirname + '/**/'],
 };

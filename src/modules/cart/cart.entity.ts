@@ -1,0 +1,18 @@
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
+import { BaseEntity } from '../../database/base-entity';
+import { OrderEntity } from '../order/entity/order.entity';
+import { Product } from '../product/entity/product.entity';
+
+@Entity('carts')
+export class CartEntity extends BaseEntity {
+  @Column({ nullable: false })
+  product: string;
+
+  @Column()
+  quantity: number;
+
+  @ManyToOne(() => OrderEntity, (order: OrderEntity) => order.cart, { nullable: true })
+  /*JoinColumn is used to create a custom Column Name */
+  @JoinColumn({ name: 'order_id' })
+  order: OrderEntity;
+}

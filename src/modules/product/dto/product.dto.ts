@@ -18,6 +18,11 @@ export class ProductDto {
   @ApiProperty()
   description: string;
 
+  @IsNumber()
+  @IsNotEmpty()
+  @ApiProperty()
+  price: number;
+
   @IsBoolean()
   @IsNotEmpty()
   @ApiProperty()
@@ -38,8 +43,6 @@ export class ProductDto {
   @ApiProperty()
   unitCount: number;
 
-  // @IsArray()
-  // images: MediaEntity;
   @IsArray()
   images: MediaEntity[];
 }
