@@ -39,21 +39,21 @@ export class ProductService {
         ...dto,
         productCategory: existingCategory.name,
         userId: id,
-        //medias: dto.images,
       });
 
+      const pushImages = [];
+
       for (let i = 0; i < dto.images.length; i++) {
-        await this.mediaRepository
-          .createQueryBuilder()
-          .insert()
-          .into(MediaEntity)
-          .values({
-            ...dto.images[i],
-            mediaCategory: 'PRODUCTS',
-            product: product,
-          })
-          .execute();
+        let image = {
+          ...dto.images[i],
+          mediaCategory: 'PRODUCTS',
+          product: product,
+        };
+
+        pushImages.push(image);
       }
+
+      await this.mediaRepository.createQueryBuilder().insert().into(MediaEntity).values(pushImages).execute();
 
       return { type: 'Success', message: 'successfully Created', product };
     } catch (error) {
@@ -67,6 +67,7 @@ export class ProductService {
       let { page, limit } = params;
 
       page = Number(page) ? +page : 1;
+
       limit = +limit ? +limit : 10;
 
       const take = Number(limit);
@@ -98,12 +99,12 @@ export class ProductService {
   }
 
   /**Fetch Single Product By ID */
-  async FindOne(id: number) {
+  async findOne(id: number) {
     try {
       const product = await this.productRepository.findOneBy({ id: id });
 
       if (!product) {
-        throw new NotFoundException({ type: 'Error', message: `product with id ${id} does not exist` });
+        return { type: 'Error', message: `product with id ${id} does not exist` };
       }
 
       return product;
@@ -122,7 +123,7 @@ export class ProductService {
       const existingCategory = await this.productCategoryRepository.findOneBy({ slug: slugify });
 
       if (existingCategory) {
-        throw new ForbiddenException({ type: 'Error', message: `Category Of '${dto.name}' Already Exists` });
+        return { type: 'Error', message: `Category Of '${dto.name}' Already Exists` };
       }
 
       const productCategory = await this.productCategoryRepository.save({ name: dto.name, slug: slugify });
@@ -132,4 +133,6 @@ export class ProductService {
       return { type: 'Error', message: error.message };
     }
   }
+
+  //Delete a Category
 }

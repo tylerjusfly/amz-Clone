@@ -13,12 +13,12 @@ export class OrderEntity extends BaseEntity {
   cart: CartEntity[];
 
   @Column({ type: 'integer', nullable: true })
-  amount: number;
+  totalPrice: number;
 
   @Column({ type: 'text' })
   address: string;
 
-  //one to one relationship
+  //one to many relationship
   @Column()
   userId: string;
 

@@ -16,25 +16,22 @@ export class ProductController {
   //using Body decorators Gets the body from the request
   @HttpCode(HttpStatus.CREATED)
   @UseGuards(JwtGuard) //pass user object into the request
-  @Post('create')
+  @Post('/create')
   AddProduct(@GetUser() user: Auth, @Body() dto: ProductDto) {
     return this.productService.Create(dto, user.id);
   }
 
   @HttpCode(HttpStatus.OK)
-  @Get('all')
+  @Get('/all')
   @ApiParam({ name: 'page', description: 'Gets the page number' })
   @ApiParam({ name: 'limit', description: 'Gets limit per page' })
   GetAllProducts(@Query() urlParams) {
-    // const limit = params.limit ? +params.limit : 4;
-    // const offset = params.page ? params.page - 1 * limit : 0;
-
     return this.productService.FetchAll(urlParams);
   }
 
   @Get('one')
   GetOneProduct(@Query() { id }) {
-    return this.productService.FindOne(id);
+    return this.productService.findOne(id);
   }
 
   /**ADMINN FUNCTIONS */

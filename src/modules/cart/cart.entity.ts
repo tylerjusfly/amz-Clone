@@ -6,7 +6,16 @@ import { Product } from '../product/entity/product.entity';
 @Entity('carts')
 export class CartEntity extends BaseEntity {
   @Column({ nullable: false })
-  product: string;
+  productId: number;
+
+  @Column()
+  name: string;
+
+  @Column()
+  price: number;
+
+  @Column()
+  unitCount: number;
 
   @Column()
   quantity: number;

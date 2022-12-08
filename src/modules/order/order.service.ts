@@ -18,46 +18,60 @@ export class OrderService {
   ) {}
 
   async CreateOrder(orderDto: OrderDto) {
-    const createOrder = {
-      owner: '3',
-      products: orderDto.products,
-    };
-    const OrdertrackingId = OrderTrackerId();
+    try {
+      const createOrder = {
+        owner: '3',
+        products: orderDto.products,
+      };
+      const OrdertrackingId = OrderTrackerId();
 
-    // create and save Order
-    const { id } = await this.orderRepository.save({
-      orderId: OrdertrackingId,
-      cart: createOrder.products,
-      address: orderDto.address,
-      userId: createOrder.owner,
-      updated: new Date(),
-    });
+      //Get ids of all produts
+      const ids = createOrder.products.map((value) => value.productId);
 
-    //send products to cart
+      const products = await this.productRepository.findBy({ id: In(ids) });
 
-    //let order = await this.orderRepository.findOneBy({ id: id });
+      //Mapping multiple objects into one object
+      let carts = createOrder.products.map((order, i) => {
+        let temp = products.find((element) => element.id === +order.productId);
 
-    let order = await this.orderRepository.findOne({
-      where: {
-        id: id,
-      },
-      relations: {
-        cart: true,
-      },
-    });
+        if (temp.id) {
+          order.name = temp.name;
+          order.price = temp.price;
+          order.unitCount = temp.unitCount;
+        }
 
-    // const ids = order.cart.map((value) => value.product);
+        return order;
+      });
 
-    // const products = await this.productRepository.findBy({ id: In(ids) });
+      // create and save Order
+      const { id } = await this.orderRepository.save({
+        orderId: OrdertrackingId,
+        cart: carts,
+        address: orderDto.address,
+        userId: createOrder.owner,
+        updated: new Date(),
+      });
 
-    // const totalPrice = order.products.reduce((acc, product) => {
-    //   const price = product.product.price * product.quantity;
-    //   return acc + price;
-    // }, 0);
+      let order = await this.orderRepository.findOne({
+        where: {
+          id: id,
+        },
+        relations: {
+          cart: true,
+        },
+      });
 
-    //let ids = orderDto.products.map((value) => value.product);
+      const totalPrice = order.cart.reduce((acc, product) => {
+        const price = product.price * product.quantity;
+        return acc + price;
+      }, 0);
 
-    //return ids;
-    return { order };
+      order.totalPrice = Math.abs(totalPrice);
+
+      return { type: 'Success', message: 'Order Created', order };
+    } catch (error) {
+      console.log(error);
+      return { type: 'Error', message: error.message };
+    }
   }
 }

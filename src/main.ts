@@ -13,10 +13,7 @@ async function bootstrap() {
   //for google Auth Implementation
 
   const corsOption = {
-    //origin: ['http://localhost:4200', '*'],
     origin: true,
-    //preflightContinue: false,
-    //optionsSuccessStatus: 204,
     credentials: true,
   };
 

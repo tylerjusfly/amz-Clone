@@ -4,8 +4,11 @@ import { IsString, IsNotEmpty, IsNumber, IsArray } from 'class-validator';
 export class OrderDto {
   @IsArray()
   products: {
-    product: string;
+    productId: number;
     quantity: number;
+    name: string;
+    unitCount: number;
+    price: number;
   }[];
 
   @IsString()
