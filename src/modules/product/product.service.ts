@@ -1,8 +1,8 @@
-import { Injectable, ForbiddenException, NotFoundException } from '@nestjs/common';
+import { Injectable, ForbiddenException, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { convertToSlug } from 'src/common/utils';
 import { MediaEntity } from 'src/database';
-import { Repository } from 'typeorm';
+import { Repository, DataSource } from 'typeorm';
 import { ProductDto } from './dto';
 import { ProductCategory } from './dto/productCategory';
 import { Product } from './entity/product.entity';
@@ -18,6 +18,7 @@ export class ProductService {
     private productCategoryRepository: Repository<ProductCategoryDb>,
     @InjectRepository(MediaEntity)
     private mediaRepository: Repository<MediaEntity>,
+    private dataSource: DataSource,
   ) {}
 
   //Method to create Function
@@ -113,6 +114,52 @@ export class ProductService {
     }
   }
 
+  // Remove Product with Transaction
+  //This transaction performs two DELETE statements executed together as a single unit.
+
+  async removeProduct(pid: number) {
+    try {
+      // const result = await this.dataSource.manager.transaction(async (transactionalEntityManager) => {
+      //   // execute queries using transactionalEntityManager
+      //   const product = await transactionalEntityManager
+      //     .createQueryBuilder()
+      //     .delete()
+      //     .from(Product)
+      //     .where('id = :id', { id: pid })
+      //     .execute();
+
+      //   const images = await transactionalEntityManager
+      //     .createQueryBuilder()
+      //     .delete()
+      //     .from(MediaEntity)
+      //     .where('product = :id', { id: pid })
+      //     .execute();
+
+      //   if (!images.affected) {
+      //     return { affected: 0 };
+      //   }
+
+      //   return { product };
+      // });
+      const result = await this.productRepository
+        .createQueryBuilder()
+        .delete()
+        .from(Product)
+        .where('id = :id', { id: pid })
+        .execute();
+
+      // return result;
+
+      if (!result.affected) {
+        return { type: 'Error', message: 'Product does not exist' };
+      } else {
+        return { type: 'Success', message: 'successfully Deleted' };
+      }
+    } catch (error) {
+      return { type: 'Error', message: error.message };
+    }
+  }
+
   //ADMINS ENDPOINTS
 
   async createProductCategory(dto: ProductCategory) {
@@ -135,4 +182,22 @@ export class ProductService {
   }
 
   //Delete a Category
+  async removeCategory(categoryid) {
+    try {
+      const result = await this.productCategoryRepository
+        .createQueryBuilder('Category')
+        .delete()
+        .from(ProductCategoryDb)
+        .where('id = :id', { id: categoryid })
+        .execute();
+
+      if (!result.affected) {
+        return { type: 'Error', message: 'Category does not exist' };
+      } else {
+        return { type: 'Success', message: 'successfully Deleted' };
+      }
+    } catch (error) {
+      return { type: 'Error', message: error.message };
+    }
+  }
 }
