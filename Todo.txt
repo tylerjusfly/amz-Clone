@@ -1,14 +1,16 @@
 
-Create Product Endpoint
-    Delete Product
+
 
 Chat SYSTEM WITH ADMIN , USERS
 
 
-Create Cart, then select all Product of carts that belongs to userid , create order,
-and delete data from cart
 
+Create a roles table to store the different roles that a user can have. The roles table should have at least two columns: id and name. The id column can be of type integer and can be set as the primary key, while the name column can be of type varchar or text and can be used to store the name of the role (e.g., "admin", "user", "seller").
 
-create order, 
-send product ids , 
-search for products , create cart
+Create a user_roles table to store the roles that are assigned to each user. The user_roles table should have at least two columns: user_id and role_id. The user_id column should be a foreign key that references the id column in the users table, while the role_id column should be a foreign key that references the id column in the roles table.
+
+Define an entity for the roles table and another entity for the user_roles table. You can use the @Entity and @Table decorators to specify the names of the tables and the columns in the entities.
+
+In the User entity, add a roles property that is an array of Role entities. You can use the @ManyToMany decorator to specify the relationship between the User and Role entities and the @JoinTable decorator to specify the name of the user_roles table and the columns that are used to join the two entities.
+
+When you want to assign multiple roles to a user, you can retrieve the user from the database, push the roles to the roles array, and then save the user entity back to the database.

@@ -3,19 +3,21 @@
 
 import { ForbiddenException, HttpException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { QueryFailedError, Repository } from 'typeorm';
+import { In, QueryFailedError, Repository } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
 import { AuthDto } from './dto';
 import * as argon from 'argon2'; /* package for hashing passwords*/
 import { Auth } from './auth.entity';
 import { ConfigService } from '@nestjs/config';
 import { MailService } from 'src/mail/mail.service';
+import { Role } from 'src/database/roles.entity';
 
 //dependency Injection
 @Injectable()
 export class AuthService {
   constructor(
     @InjectRepository(Auth) private authRepository: Repository<Auth>,
+    @InjectRepository(Role) private roleRepository: Repository<Role>,
     private jwt: JwtService,
     private config: ConfigService,
     private mailService: MailService,
@@ -79,12 +81,6 @@ export class AuthService {
     return this.SignToken(newUser, newUser.email);
   }
 
-  // async findUser(id: number) {
-  //   const user = await this.authRepository.findOneBy({ id });
-
-  //   return user;
-  // }
-
   async SignToken(user: Auth, email: string) {
     const payload = {
       sub: user.id,
@@ -99,5 +95,75 @@ export class AuthService {
     });
 
     return { type: 'Success', access_token: Token, user };
+  }
+
+  async createRoles(name: string, createdBy: string) {
+    try {
+      if (!name) {
+        return { type: 'Error', message: 'role name is not Provided' };
+      }
+      const role = this.roleRepository.create({ name: name });
+
+      await this.roleRepository.save(role);
+
+      return { type: 'Success', role };
+    } catch (error) {
+      return { type: 'Error', message: error.message };
+    }
+  }
+
+  async assignRolesToUser(userId: number, roleIds: number[]) {
+    try {
+      const user = await this.authRepository.findOneBy({ id: userId });
+
+      if (!user) {
+        return { type: 'Error', message: 'User not Found' };
+      }
+
+      // Find the roles
+      const roles = await this.roleRepository.findBy({ id: In(roleIds) });
+
+      if (roles.length !== roleIds.length) {
+        return { type: 'Error', message: 'Not all roles were found' };
+      }
+
+      // Assign Roles
+      user.roles = roles;
+
+      const userToSave = await this.authRepository.save(user);
+
+      if (!userToSave) {
+        return { type: 'Error', message: 'An error occured while saving roles to user' };
+      }
+
+      console.log('adding Roles', userToSave);
+
+      return { type: 'Success', message: 'Roles Successfully added' };
+    } catch (error) {
+      return { type: 'Error', message: error.message };
+    }
+  }
+
+  async removeRolesFromUser(userId: number, roleid: number) {
+    try {
+      // return roleid;
+      const user = await this.authRepository.findOne({
+        where: { id: userId },
+        relations: ['roles'],
+      });
+
+      if (!user) {
+        return { type: 'Error', message: 'User not Found' };
+      }
+
+      // Filter Roles From users
+      user.roles = user.roles.filter((role) => role.id !== +roleid);
+
+      await this.authRepository.save(user);
+
+      return { type: 'Success', message: 'Role Successfully Removed', user };
+    } catch (error) {
+      return { type: 'Error', message: error.message };
+    }
   }
 }

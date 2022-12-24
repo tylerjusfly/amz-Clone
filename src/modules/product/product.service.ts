@@ -220,7 +220,7 @@ export class ProductService {
       const result = await this.productCategoryRepository.remove(data);
 
       if (!result) {
-        return { type: 'Error', message: 'Category does not exist' };
+        return { type: 'Error', message: 'An Error Occured Removing Category' };
       } else {
         return { type: 'Success', message: 'successfully Deleted' };
       }

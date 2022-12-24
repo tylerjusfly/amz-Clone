@@ -1,5 +1,4 @@
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
-import { MediaEntity } from './media.entity';
 
 import { Env } from '../configuration/config';
 

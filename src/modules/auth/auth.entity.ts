@@ -1,5 +1,6 @@
 import { BaseEntity } from '../../database/base-entity';
-import { Column, Entity } from 'typeorm';
+import { Column, Entity, JoinTable, ManyToMany } from 'typeorm';
+import { Role } from 'src/database/roles.entity';
 
 @Entity('users')
 export class Auth extends BaseEntity {
@@ -14,4 +15,8 @@ export class Auth extends BaseEntity {
 
   @Column({ type: 'text', nullable: true })
   bio: string;
+
+  @ManyToMany(() => Role)
+  @JoinTable({ name: 'user_roles' })
+  roles: Role[];
 }

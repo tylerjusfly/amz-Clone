@@ -7,9 +7,10 @@ import { AuthService } from './auth.service';
 import { SessionSerializer } from './guard/serializer';
 import { GoogleStrategy, JwtStrategy } from './strategy';
 import { MailModule } from 'src/mail/mail.module';
+import { Role } from 'src/database/roles.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Auth]), JwtModule.register({}), MailModule],
+  imports: [TypeOrmModule.forFeature([Auth, Role]), JwtModule.register({}), MailModule],
   controllers: [AuthController],
   providers: [AuthService, JwtStrategy, GoogleStrategy, SessionSerializer],
 })

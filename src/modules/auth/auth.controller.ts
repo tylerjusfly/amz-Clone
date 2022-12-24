@@ -1,5 +1,5 @@
 // anotate with Controller Decorator so nest knows its a controller
-import { Controller, Post, Body, HttpCode, HttpStatus, Get, UseGuards } from '@nestjs/common';
+import { Controller, Post, Body, HttpCode, HttpStatus, Get, UseGuards, Patch } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { AuthDto } from './dto';
@@ -27,6 +27,21 @@ export class AuthController {
   @Get('google')
   GoogleAuth() {
     return { message: 'Google Auth Init' };
+  }
+
+  @Post('create-roles')
+  createRole(@Body() { name }) {
+    return this.authService.createRoles(name, 'tyler');
+  }
+
+  @Post('assign-roles')
+  assignRoles(@Body() { userId, roleids }) {
+    return this.authService.assignRolesToUser(userId, roleids);
+  }
+
+  @Patch('remove-role')
+  removeRole(@Body() { userId, roleid }) {
+    return this.authService.removeRolesFromUser(userId, roleid);
   }
 }
 
