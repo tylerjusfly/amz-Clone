@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Body, HttpCode, HttpStatus, Query, UseGuards, Patch } from '@nestjs/common';
+import { Controller, Post, Get, Body, HttpCode, HttpStatus, Query, UseGuards, Patch, Delete } from '@nestjs/common';
 import { ProductService } from './product.service';
 import { ProductDto } from './dto';
 import { ApiParam, ApiTags } from '@nestjs/swagger';
@@ -34,7 +34,12 @@ export class ProductController {
     return this.productService.findOne(id);
   }
 
-  @Post('delete')
+  @Patch('edit')
+  editProduct(@Query() { pid }, @Body() params) {
+    return this.productService.editProduct(pid, params);
+  }
+
+  @Delete('delete')
   removeProduct(@Query() { pid }) {
     return this.productService.removeProduct(pid);
   }
@@ -45,7 +50,7 @@ export class ProductController {
     return this.productService.createProductCategory(dto);
   }
 
-  @Patch('category/delete')
+  @Delete('category/delete')
   removeCategory(@Query() { cid }) {
     return this.productService.removeCategory(cid);
   }

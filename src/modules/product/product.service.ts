@@ -108,47 +108,61 @@ export class ProductService {
         return { type: 'Error', message: `product with id ${id} does not exist` };
       }
 
-      return product;
+      return { type: 'Success', product };
     } catch (error) {
       return { type: 'Error', message: error.message };
     }
   }
 
+  // Edit product
+  async editProduct(pid: number, params: ProductDto) {
+    const queryRunner = this.dataSource.createQueryRunner();
+
+    // establish real database connection using our new query runner
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+    try {
+      const product = await this.productRepository.findOneBy({ id: pid });
+
+      if (!product) {
+        return { type: 'Error', message: 'Invalid Product' };
+      }
+
+      product.name = params.name;
+      product.description = params.description;
+      product.price = params.price;
+      product.brand = params.brand;
+      product.color = params.color;
+      product.isAvailable = params.isAvailable;
+      // product.productCategory = params.productCategory;
+      product.unitCount = params.unitCount;
+
+      //save transaction before committing
+      await this.productRepository.save(product);
+
+      await queryRunner.commitTransaction();
+
+      return { type: 'Success', product };
+    } catch (error) {
+      // since we have errors let's rollback changes we made
+      await queryRunner.rollbackTransaction();
+      return { type: 'Error', message: error.message };
+    } finally {
+      await queryRunner.release();
+    }
+  }
+
   // Remove Product with Transaction
-  //This transaction performs two DELETE statements executed together as a single unit.
+  //transaction performs two DELETE statements executed together as a single unit.
 
   async removeProduct(pid: number) {
     try {
-      // const result = await this.dataSource.manager.transaction(async (transactionalEntityManager) => {
-      //   // execute queries using transactionalEntityManager
-      //   const product = await transactionalEntityManager
-      //     .createQueryBuilder()
-      //     .delete()
-      //     .from(Product)
-      //     .where('id = :id', { id: pid })
-      //     .execute();
-
-      //   const images = await transactionalEntityManager
-      //     .createQueryBuilder()
-      //     .delete()
-      //     .from(MediaEntity)
-      //     .where('product = :id', { id: pid })
-      //     .execute();
-
-      //   if (!images.affected) {
-      //     return { affected: 0 };
-      //   }
-
-      //   return { product };
-      // });
       const result = await this.productRepository
         .createQueryBuilder()
         .delete()
         .from(Product)
         .where('id = :id', { id: pid })
         .execute();
-
-      // return result;
 
       if (!result.affected) {
         return { type: 'Error', message: 'Product does not exist' };
@@ -184,14 +198,28 @@ export class ProductService {
   //Delete a Category
   async removeCategory(categoryid) {
     try {
-      const result = await this.productCategoryRepository
-        .createQueryBuilder('Category')
-        .delete()
-        .from(ProductCategoryDb)
-        .where('id = :id', { id: categoryid })
-        .execute();
+      //Find all Product with this category,
+      // Set category to "deleted", this will let user re assign its product to another category
+      // or others category
+      const data = await this.productCategoryRepository.findOne({ where: { id: categoryid } });
 
-      if (!result.affected) {
+      if (!data) {
+        return { type: 'Error', message: 'Category does not exist' };
+      }
+
+      //Find All Product with This Category
+      let products = await this.productRepository.find({ where: { productCategory: data.name } });
+
+      for (const item of products) {
+        item.productCategory = 'Others';
+      }
+      // Save the updated entities
+      await this.productRepository.save(products);
+
+      // Delete the data
+      const result = await this.productCategoryRepository.remove(data);
+
+      if (!result) {
         return { type: 'Error', message: 'Category does not exist' };
       } else {
         return { type: 'Success', message: 'successfully Deleted' };

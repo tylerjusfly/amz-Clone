@@ -1,4 +1,3 @@
-import { CartEntity } from 'src/modules/cart/cart.entity';
 import { Column, Entity, OneToMany } from 'typeorm';
 import { BaseEntity, MediaEntity } from '../../../database'; /**import base Entity class for DRY Code */
 
@@ -22,7 +21,7 @@ export class Product extends BaseEntity {
   @Column({ type: 'boolean', default: false })
   isAvailable: boolean;
 
-  @Column({ type: 'float4', nullable: false })
+  @Column({ type: 'decimal', nullable: false, precision: 10, scale: 2 })
   price: number;
 
   @Column({ type: 'integer', nullable: false, default: 0.0 })
