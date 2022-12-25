@@ -1,18 +1,13 @@
-
-
-
 Chat SYSTEM WITH ADMIN , USERS
 
 
 
-OrderService
-    fetch orders by userId and paginate
-    fetch all orders by ASC and paginated
 
+    APIs for crypto
+        Coinbase Commerce API: This API allows you to accept payments in a variety of cryptocurrencies, including Bitcoin, Ethereum, Litecoin, and more. It supports multiple payment methods, such as online payments, mobile payments, and recurring payments.
 
-Product
-    fetch all products by userId and paginated
-    search for products by name , Index name to make it faster
+    BitPay API: The BitPay API allows you to accept payments in Bitcoin and Bitcoin Cash. It provides a variety of features, such as invoicing, recurring payments, and integration with popular e-commerce platforms.
 
-CATEGORY
-    fetch products by category and Paginated 
+    Stripe API: While Stripe primarily supports traditional payment methods, it also allows you to accept payments in Bitcoin through its Stripe Bitcoin API. This API is currently in beta and is only available to select users.
+
+    GoCoin API: The GoCoin API allows you to accept payments in Bitcoin, Litecoin, and other altcoins. It provides features such as invoicing, recurring payments, and integrations with popular e-commerce platforms.

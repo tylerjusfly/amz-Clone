@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Patch, Query } from '@nestjs/common';
+import { Controller, Post, Body, Patch, Query, Get } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { OrderDto } from './order.dto';
 import { OrderService } from './order.service';
@@ -7,6 +7,11 @@ import { OrderService } from './order.service';
 @Controller('orders')
 export class OrderController {
   constructor(private orderService: OrderService) {}
+
+  @Get('')
+  getOrders(@Query() options, @Body() params) {
+    return this.orderService.fetchOrders(options, params);
+  }
 
   @Post('')
   createOrder(@Body() orderDto: OrderDto) {

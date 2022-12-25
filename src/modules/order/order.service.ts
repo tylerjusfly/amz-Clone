@@ -6,6 +6,7 @@ import { OrderDto } from './order.dto';
 import { OrderEntity } from './entity/order.entity';
 import { OrderTrackerId } from 'src/common/utils';
 import { CartEntity } from '../cart/cart.entity';
+import { PaginationInterface } from 'src/common/pagination.dto';
 
 @Injectable()
 export class OrderService {
@@ -16,6 +17,37 @@ export class OrderService {
     @InjectRepository(OrderEntity) private orderRepository: Repository<OrderEntity>,
     @InjectRepository(CartEntity) private cartRepository: Repository<CartEntity>,
   ) {}
+
+  async fetchOrders(options: PaginationInterface, params) {
+    try {
+      const query = this.orderRepository.createQueryBuilder('q').leftJoinAndSelect('q.cart', 'cart');
+
+      if (params.userid && params.userid !== '') {
+        query.where('q.userId = :userid', { userid: params.userid });
+      }
+
+      const page = +options.page - 1;
+
+      let orders = await query
+        .offset(page * +options.limit)
+        .limit(+options.limit)
+        .orderBy('q.createdAt', 'DESC')
+        .getMany();
+
+      const total = await query.getCount();
+
+      return {
+        type: 'Success',
+        orders,
+        totalPages: Math.ceil(total / options.limit),
+        itemsPerPage: options.limit,
+        totalItems: total,
+        currentPage: options.page,
+      };
+    } catch (error) {
+      return { type: 'Error', message: error.message };
+    }
+  }
 
   async CreateOrder(orderDto: OrderDto) {
     try {

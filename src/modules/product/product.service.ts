@@ -1,6 +1,6 @@
 import { Injectable, ForbiddenException, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { convertToSlug } from 'src/common/utils';
+import { convertToSlug, toTitleCase } from 'src/common/utils';
 import { MediaEntity } from 'src/database';
 import { Repository, DataSource } from 'typeorm';
 import { ProductDto } from './dto';
@@ -28,16 +28,17 @@ export class ProductService {
       const existingCategory = await this.productCategoryRepository.findOneBy({ id: +dto.productCategory });
 
       if (!existingCategory) {
-        throw new ForbiddenException({ type: 'Error', message: `Category Not Found` });
+        return { type: 'Error', message: `Category Not Found` };
       }
 
       if (dto.images.length !== 5) {
-        throw new ForbiddenException({ type: 'Error', message: `5 Images are Required to Create A Product` });
+        return { type: 'Error', message: `5 Images are Required to Create A Product` };
       }
 
       //Create Product
       const product = await this.productRepository.save({
         ...dto,
+        name: toTitleCase(dto.name),
         productCategory: existingCategory.name,
         userId: id,
       });
@@ -62,37 +63,48 @@ export class ProductService {
     }
   }
 
-  async FetchAll(params: PaginationInterface) {
+  async fetchProducts(params: PaginationInterface, data) {
     try {
-      //converting values to number, and cross Checking if Number
-      let { page, limit } = params;
-
-      page = Number(page) ? +page : 1;
-
-      limit = +limit ? +limit : 10;
-
-      const take = Number(limit);
-
-      const offset = (page - 1) * Number(limit);
-
       //create Query to get many products , orderBy DESC
       const query = this.productRepository.createQueryBuilder('products');
 
-      query.orderBy('products.createdAt', 'DESC').take(take).skip(offset);
+      if (data.userid && data.userid !== '') {
+        query.where('products.userId = :userid', { userid: data.userid });
+      }
+
+      //if category exists
+      if (data.category && data.category !== '') {
+        // Find the category
+        const category = await this.productCategoryRepository.findOneBy({ id: data.category });
+
+        if (!category) return { type: 'Error', message: 'category not found' };
+
+        query.andWhere('products.productCategory = :categoryname', { categoryname: category.name });
+      }
+
+      if (data.name && data.name !== '') {
+        let formattedName = toTitleCase(data.name);
+        query.andWhere('products.name LIKE :name', { name: `%${formattedName}%` });
+      }
+
+      const page = +params.page - 1;
+
+      let products = await query
+        .offset(page * +params.limit)
+        .limit(+params.limit)
+        .orderBy('products.createdAt', 'DESC')
+        .getMany();
 
       //Get count of products
       const total = await query.getCount();
-      const products = await query.getMany();
-
-      if (!products) return { type: 'Error', message: 'products Not found' };
 
       return {
         type: 'Success',
         result: products,
-        totalPages: Math.ceil(total / take),
-        itemsPerPage: limit,
+        totalPages: Math.ceil(total / params.limit),
+        itemsPerPage: params.limit,
         totalItems: total,
-        currentPage: page,
+        currentPage: params.page,
       };
     } catch (error) {
       return { type: 'Error', message: error.message };

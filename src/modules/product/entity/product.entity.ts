@@ -1,8 +1,9 @@
-import { Column, Entity, OneToMany } from 'typeorm';
+import { Column, Entity, OneToMany, Index } from 'typeorm';
 import { BaseEntity, MediaEntity } from '../../../database'; /**import base Entity class for DRY Code */
 
 @Entity('products') /* Strictly mentioning the name of the table */
 export class Product extends BaseEntity {
+  @Index('product_name_index')
   @Column({ type: 'varchar', nullable: true })
   name: string;
 

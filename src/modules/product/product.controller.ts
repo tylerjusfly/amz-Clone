@@ -25,8 +25,8 @@ export class ProductController {
   @Get('/all')
   @ApiParam({ name: 'page', description: 'Gets the page number' })
   @ApiParam({ name: 'limit', description: 'Gets limit per page' })
-  GetAllProducts(@Query() urlParams) {
-    return this.productService.FetchAll(urlParams);
+  GetAllProducts(@Query() urlParams, @Body() data) {
+    return this.productService.fetchProducts(urlParams, data);
   }
 
   @Get('one')

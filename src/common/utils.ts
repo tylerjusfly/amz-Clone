@@ -14,3 +14,14 @@ export const OrderTrackerId = () => {
     return v.toString(16);
   });
 };
+
+const capitalizeWord = (word) => {
+  return word[0].toUpperCase() + word.slice(1);
+};
+
+export const toTitleCase = (str) => {
+  return str
+    .split(' ')
+    .map((word) => capitalizeWord(word))
+    .join(' ');
+};
