@@ -1,4 +1,4 @@
-import { Controller, Post, Body } from '@nestjs/common';
+import { Controller, Post, Body, Patch, Query } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { OrderDto } from './order.dto';
 import { OrderService } from './order.service';
@@ -11,5 +11,15 @@ export class OrderController {
   @Post('')
   createOrder(@Body() orderDto: OrderDto) {
     return this.orderService.CreateOrder(orderDto);
+  }
+
+  @Patch('order-status')
+  switchOrderStatus(@Query() { id }, @Body() data) {
+    return this.orderService.SwitchOrderStatus(id, data);
+  }
+
+  @Patch('payment-status')
+  switchPaymentStatus(@Query() { id, paid }) {
+    return this.orderService.switchPaymentStatus(id, paid);
   }
 }

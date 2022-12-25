@@ -130,13 +130,8 @@ export class AuthService {
       // Assign Roles
       user.roles = roles;
 
-      const userToSave = await this.authRepository.save(user);
-
-      if (!userToSave) {
-        return { type: 'Error', message: 'An error occured while saving roles to user' };
-      }
-
-      console.log('adding Roles', userToSave);
+      //Save All Changes Made To user data
+      await this.authRepository.save(user);
 
       return { type: 'Success', message: 'Roles Successfully added' };
     } catch (error) {

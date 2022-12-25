@@ -20,7 +20,7 @@ export class OrderService {
   async CreateOrder(orderDto: OrderDto) {
     try {
       const createOrder = {
-        owner: '3',
+        owner: '119',
         products: orderDto.products,
       };
       const OrdertrackingId = OrderTrackerId();
@@ -29,6 +29,10 @@ export class OrderService {
       const ids = createOrder.products.map((value) => value.productId);
 
       const products = await this.productRepository.findBy({ id: In(ids) });
+
+      if (products.length !== createOrder.products.length) {
+        return { type: 'Error', message: 'Not all Products were found' };
+      }
 
       //Mapping multiple objects into one object
       let carts = createOrder.products.map((order, i) => {
@@ -52,6 +56,7 @@ export class OrderService {
         updated: new Date(),
       });
 
+      // Getting order After saving Order
       let order = await this.orderRepository.findOne({
         where: {
           id: id,
@@ -62,15 +67,77 @@ export class OrderService {
       });
 
       const totalPrice = order.cart.reduce((acc, product) => {
-        const price = product.price * product.quantity;
+        const price = Math.abs(product.price) * product.quantity;
         return acc + price;
       }, 0);
 
+      // return Math.abs(totalPrice);
+
       order.totalPrice = Math.abs(totalPrice);
 
-      return { type: 'Success', message: 'Order Created', order };
+      await this.orderRepository.save(order);
+
+      return { type: 'Success', message: 'Order Created' };
     } catch (error) {
       console.log(error);
+      return { type: 'Error', message: error.message };
+    }
+  }
+
+  // Switch Order Status
+  async SwitchOrderStatus(orderId: number, { orderStatus }) {
+    try {
+      let orderTypeArray = ['Not processed', 'Processing', 'Shipped', 'Delivered', 'Cancelled'];
+
+      // if orderid is not specified || orderstatus is not specified
+      if (!orderId || !orderStatus || !orderTypeArray.includes(orderStatus)) {
+        return { type: 'Error', message: 'invalid data specified' };
+      }
+      // Find Order
+      const order = await this.orderRepository.findOneBy({ id: orderId });
+
+      if (!order) {
+        return { type: 'Error', message: 'Order Not Found' };
+      }
+
+      order.status = orderStatus;
+      order.updated = new Date();
+
+      await this.orderRepository.save(order);
+
+      return { type: 'Success', order };
+    } catch (error) {
+      return { type: 'Error', message: error.message };
+    }
+  }
+
+  async switchPaymentStatus(orderId: number, paid: string) {
+    try {
+      if (!orderId || !paid) {
+        return { type: 'Error', message: 'orderId or Paid Status is not specified' };
+      }
+      // Find the order
+      const orderData = await this.orderRepository.findOneBy({ id: orderId });
+
+      if (!orderData) {
+        return { type: 'Error', message: 'Order Not Found' };
+      }
+      // change order payment status
+      switch (paid) {
+        case '1':
+          orderData.paymentStatus = true;
+          orderData.updated = new Date();
+          break;
+        default:
+          orderData.paymentStatus = false;
+          orderData.updated = new Date();
+          break;
+      }
+
+      await this.orderRepository.save(orderData);
+
+      return { type: 'Success', message: 'Payment status successfully Changed', orderData };
+    } catch (error) {
       return { type: 'Error', message: error.message };
     }
   }

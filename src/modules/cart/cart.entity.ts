@@ -11,10 +11,10 @@ export class CartEntity extends BaseEntity {
   @Column()
   name: string;
 
-  @Column()
+  @Column({ type: 'decimal', nullable: false, precision: 10, scale: 2 })
   price: number;
 
-  @Column()
+  @Column({ type: 'integer' })
   unitCount: number;
 
   @Column()

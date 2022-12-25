@@ -219,11 +219,7 @@ export class ProductService {
       // Delete the data
       const result = await this.productCategoryRepository.remove(data);
 
-      if (!result) {
-        return { type: 'Error', message: 'An Error Occured Removing Category' };
-      } else {
-        return { type: 'Success', message: 'successfully Deleted' };
-      }
+      return { type: 'Success', message: 'successfully Deleted' };
     } catch (error) {
       return { type: 'Error', message: error.message };
     }

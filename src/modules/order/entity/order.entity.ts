@@ -12,7 +12,7 @@ export class OrderEntity extends BaseEntity {
   @OneToMany(() => CartEntity, (cart: CartEntity) => cart.order, { cascade: true })
   cart: CartEntity[];
 
-  @Column({ type: 'integer', nullable: true })
+  @Column({ type: 'decimal', nullable: true, precision: 10, scale: 2 })
   totalPrice: number;
 
   @Column({ type: 'text' })
