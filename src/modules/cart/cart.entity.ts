@@ -14,9 +14,6 @@ export class CartEntity extends BaseEntity {
   @Column({ type: 'decimal', nullable: false, precision: 10, scale: 2 })
   price: number;
 
-  @Column({ type: 'integer' })
-  unitCount: number;
-
   @Column()
   quantity: number;
 

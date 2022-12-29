@@ -1,6 +1,7 @@
 Chat SYSTEM WITH ADMIN , USERS
 
 
+Check and deduct products quanity when order is successful
 
 
     APIs for crypto

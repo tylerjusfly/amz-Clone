@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, Repository } from 'typeorm';
+import { In, Repository, DataSource } from 'typeorm';
 import { Product } from '../product/entity/product.entity';
 import { OrderDto } from './order.dto';
 import { OrderEntity } from './entity/order.entity';
@@ -16,6 +16,7 @@ export class OrderService {
     private productRepository: Repository<Product>,
     @InjectRepository(OrderEntity) private orderRepository: Repository<OrderEntity>,
     @InjectRepository(CartEntity) private cartRepository: Repository<CartEntity>,
+    private dataSource: DataSource,
   ) {}
 
   async fetchOrders(options: PaginationInterface, params) {
@@ -73,7 +74,6 @@ export class OrderService {
         if (temp.id) {
           order.name = temp.name;
           order.price = temp.price;
-          order.unitCount = temp.unitCount;
         }
 
         return order;
@@ -144,33 +144,75 @@ export class OrderService {
   }
 
   async switchPaymentStatus(orderId: number, paid: string) {
+    const queryRunner = this.dataSource.createQueryRunner();
+
+    // put it outside so its not be rolled back if an error occurs.
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
     try {
       if (!orderId || !paid) {
         return { type: 'Error', message: 'orderId or Paid Status is not specified' };
       }
       // Find the order
-      const orderData = await this.orderRepository.findOneBy({ id: orderId });
+      const orderData = await this.orderRepository.findOne({
+        where: { id: orderId },
+        relations: ['cart'],
+      });
 
       if (!orderData) {
         return { type: 'Error', message: 'Order Not Found' };
       }
-      // change order payment status
-      switch (paid) {
-        case '1':
-          orderData.paymentStatus = true;
-          orderData.updated = new Date();
-          break;
-        default:
-          orderData.paymentStatus = false;
-          orderData.updated = new Date();
-          break;
+      if ((paid === 'true' && orderData.paymentStatus) || (paid === 'false' && !orderData.paymentStatus)) {
+        return { type: 'Error', message: 'redundant attempt to manipulate payment status' };
+      }
+
+      // change order payment status and update products
+      const productids = orderData.cart.map((p) => p.productId);
+
+      const products = await this.productRepository.findBy({ id: In(productids) });
+
+      // if order is paid and order.payment status is not true
+      if (paid === 'true' && !orderData.paymentStatus) {
+        orderData.paymentStatus = true;
+        orderData.updated = new Date();
+
+        // Deduct From product Bought
+        const updatedProducts = products.map((product) => {
+          const quantity = orderData.cart.find((q) => q.productId === product.id)?.quantity || 0;
+
+          return { ...product, unitCount: product.unitCount - quantity };
+        });
+
+        console.log('changed to true and quantity deducted');
+        await this.productRepository.save(updatedProducts);
+      }
+
+      if (paid === 'false' && orderData.paymentStatus) {
+        orderData.paymentStatus = false;
+        orderData.updated = new Date();
+
+        // add it back up
+        const updatedProducts = products.map((product) => {
+          const quantity = orderData.cart.find((q) => q.productId === product.id)?.quantity || 0;
+
+          return { ...product, unitCount: product.unitCount + quantity };
+        });
+
+        console.log('changed to false and quantity bought added back');
+        await this.productRepository.save(updatedProducts);
       }
 
       await this.orderRepository.save(orderData);
 
+      await queryRunner.commitTransaction();
+
       return { type: 'Success', message: 'Payment status successfully Changed', orderData };
     } catch (error) {
+      await queryRunner.rollbackTransaction();
       return { type: 'Error', message: error.message };
+    } finally {
+      await queryRunner.release();
     }
   }
 }

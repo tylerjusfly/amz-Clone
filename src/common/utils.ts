@@ -19,9 +19,13 @@ const capitalizeWord = (word) => {
   return word[0].toUpperCase() + word.slice(1);
 };
 
-export const toTitleCase = (str) => {
+export const toTitleCase = (str): string => {
   return str
     .split(' ')
     .map((word) => capitalizeWord(word))
     .join(' ');
 };
+
+export function paginate(array, pageLimit, pageNumber) {
+  return array.slice(pageLimit * (pageNumber - 1), pageLimit * pageNumber);
+}
