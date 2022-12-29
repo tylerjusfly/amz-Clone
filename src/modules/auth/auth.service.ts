@@ -28,20 +28,34 @@ export class AuthService {
       //hashing password
       const hash = await argon.hash(dto.password);
 
-      //save user to db
-      const user = await this.authRepository.save({
+      let roleIds = [1];
+
+      const roles = await this.roleRepository.findBy({ id: In(roleIds) });
+
+      if (roles.length !== roleIds.length) {
+        return { type: 'Error', message: 'Not all roles were found' };
+      }
+
+      // //save user to db
+      const user = this.authRepository.create({
         email: dto.email,
         password: hash,
+        roles,
       });
 
-      //and return user
-      delete user.password;
+      const rolesids = user.roles.map((role) => role.name);
 
-      //send mail
+      await this.authRepository.save(user);
+
+      delete user.password;
+      delete user.roles;
+
+      // //send mail
       await this.mailService.sendConfirmEmail(user.email);
 
-      return this.SignToken(user, user.email);
+      return this.SignToken(user, user.email, rolesids);
     } catch (error) {
+      console.log(error);
       if (error instanceof QueryFailedError) {
         if (error.driverError.code === '23505') {
           return { type: 'Error', message: 'Credentials Taken' };
@@ -54,7 +68,12 @@ export class AuthService {
 
   async Login(dto: AuthDto) {
     // find user By Email
-    const user = await this.authRepository.findOneBy({ email: dto.email });
+    // const user = await this.authRepository.findOneBy({ email: dto.email });
+    const user = await this.authRepository.findOne({
+      where: { email: dto.email },
+      relations: ['roles'],
+    });
+
     //does not exist , throw execption
     if (!user) return { type: 'Error', message: 'Incorrect Credentials' };
 
@@ -65,26 +84,42 @@ export class AuthService {
     if (!passMatch) return { type: 'Error', message: 'Incorrect Credentials' };
 
     //if correct , send back users
+    // get roles Ids
+    const rolesids = user.roles.map((role) => role.name);
 
-    return this.SignToken(user, user.email);
+    delete user.roles;
+
+    return this.SignToken(user, user.email, rolesids);
   }
 
   async ValidateGoogleUser(email: string) {
     //find User
-    const user = await this.authRepository.findOneBy({ email: email });
+    const user = await this.authRepository.findOne({
+      where: { email: email },
+      relations: ['roles'],
+    });
+
+    // get roles Ids
+    const roles = user.roles.map((role) => role.name);
 
     //if found return
-    if (user) return this.SignToken(user, user.email);
-    //else Create
-    const newUser = await this.authRepository.save({ email: email });
 
-    return this.SignToken(newUser, newUser.email);
+    if (user) {
+      return this.SignToken(user, user.email, roles);
+    }
+
+    //else Create
+    // const newUser = await this.authRepository.save({ email: email });
+
+    return { type: 'Error', message: 'unable To Register with Google at this Moment' };
+    // return this.SignToken(newUser, newUser.email,);
   }
 
-  async SignToken(user: Auth, email: string) {
+  async SignToken(user: Auth, email: string, roles) {
     const payload = {
       sub: user.id,
       email: email,
+      roles: roles,
     };
 
     const secret = this.config.get('JWT_SECRET');
@@ -162,3 +197,18 @@ export class AuthService {
     }
   }
 }
+
+// @Injectable()
+// export class AdminGuard implements CanActivate {
+//   canActivate(context: ExecutionContext): boolean | Promise<boolean> {
+//     const request = context.switchToHttp().getRequest();
+//     const user = request.user;
+//     return user.isAdmin;
+//   }
+// }
+
+// @Controller('/products')
+// @UseGuards(AdminGuard)
+// export class ProductController {
+//   // controller methods go here
+// }

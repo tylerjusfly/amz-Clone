@@ -16,6 +16,8 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
   }
 
   async validate(payload: { sub: number; email: string }) {
+    // const user = await this.authRepository.findOneBy({ id: payload.sub });
+
     const user = await this.authRepository.findOneBy({ id: payload.sub });
 
     delete user.password;
