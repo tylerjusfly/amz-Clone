@@ -8,6 +8,7 @@ import { ProductCategory } from './dto/productCategory';
 import { Product } from './entity/product.entity';
 import { ProductCategoryDb } from './entity/productcategory.entity';
 import { PaginationInterface } from '../../common/pagination.dto';
+import { isAdmin, isOwnerOrAdmin } from '../auth/decorators/checkAuth';
 
 @Injectable()
 export class ProductService {
@@ -127,7 +128,7 @@ export class ProductService {
   }
 
   // Edit product
-  async editProduct(pid: number, params: ProductDto) {
+  async editProduct(pid: number, params: ProductDto, user) {
     const queryRunner = this.dataSource.createQueryRunner();
 
     // establish real database connection using our new query runner
@@ -140,13 +141,23 @@ export class ProductService {
         return { type: 'Error', message: 'Invalid Product' };
       }
 
+      if (!isOwnerOrAdmin(user, product)) {
+        return { type: 'Unauthorized', message: 'Owner or Admin Access Only' };
+      }
+
       product.name = params.name;
       product.description = params.description;
       product.price = params.price;
       product.brand = params.brand;
       product.color = params.color;
       product.isAvailable = params.isAvailable;
-      // product.productCategory = params.productCategory;
+
+      // Find product Category
+      const category = await this.productCategoryRepository.findOneBy({ id: +params.productCategory });
+
+      if (!category) return { type: 'Error', message: 'category not found' };
+
+      product.productCategory = category.name;
       product.unitCount = params.unitCount;
 
       //save transaction before committing

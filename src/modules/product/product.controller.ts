@@ -21,7 +21,7 @@ export class ProductController {
     return this.productService.Create(dto, user.id);
   }
 
-  @HttpCode(HttpStatus.OK)
+  // @HttpCode(HttpStatus.OK)
   @Get('/all')
   @ApiParam({ name: 'page', description: 'Gets the page number' })
   @ApiParam({ name: 'limit', description: 'Gets limit per page' })
@@ -34,9 +34,10 @@ export class ProductController {
     return this.productService.findOne(id);
   }
 
+  @UseGuards(JwtGuard)
   @Patch('edit')
-  editProduct(@Query() { pid }, @Body() params) {
-    return this.productService.editProduct(pid, params);
+  editProduct(@GetUser() user: Auth, @Query() { pid }, @Body() params) {
+    return this.productService.editProduct(pid, params, user);
   }
 
   @Delete('delete')

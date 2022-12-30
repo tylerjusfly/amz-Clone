@@ -28,11 +28,11 @@ export class AuthService {
       //hashing password
       const hash = await argon.hash(dto.password);
 
-      let roleIds = [1];
+      let rolesToAssign = [1];
 
-      const roles = await this.roleRepository.findBy({ id: In(roleIds) });
+      const roles = await this.roleRepository.findBy({ id: In(rolesToAssign) });
 
-      if (roles.length !== roleIds.length) {
+      if (roles.length !== rolesToAssign.length) {
         return { type: 'Error', message: 'Not all roles were found' };
       }
 
@@ -43,7 +43,7 @@ export class AuthService {
         roles,
       });
 
-      const rolesids = user.roles.map((role) => role.name);
+      // const rolesname = user.roles.map((role) => role.name);
 
       await this.authRepository.save(user);
 
@@ -53,7 +53,7 @@ export class AuthService {
       // //send mail
       await this.mailService.sendConfirmEmail(user.email);
 
-      return this.SignToken(user, user.email, rolesids);
+      return this.SignToken(user, user.email);
     } catch (error) {
       console.log(error);
       if (error instanceof QueryFailedError) {
@@ -71,7 +71,7 @@ export class AuthService {
     // const user = await this.authRepository.findOneBy({ email: dto.email });
     const user = await this.authRepository.findOne({
       where: { email: dto.email },
-      relations: ['roles'],
+      // relations: ['roles'],
     });
 
     //does not exist , throw execption
@@ -85,27 +85,23 @@ export class AuthService {
 
     //if correct , send back users
     // get roles Ids
-    const rolesids = user.roles.map((role) => role.name);
+    // const rolesname = user.roles.map((role) => role.name);
 
-    delete user.roles;
+    // delete user.roles;
 
-    return this.SignToken(user, user.email, rolesids);
+    return this.SignToken(user, user.email);
   }
 
   async ValidateGoogleUser(email: string) {
     //find User
     const user = await this.authRepository.findOne({
       where: { email: email },
-      relations: ['roles'],
     });
-
-    // get roles Ids
-    const roles = user.roles.map((role) => role.name);
 
     //if found return
 
     if (user) {
-      return this.SignToken(user, user.email, roles);
+      return this.SignToken(user, user.email);
     }
 
     //else Create
@@ -115,11 +111,10 @@ export class AuthService {
     // return this.SignToken(newUser, newUser.email,);
   }
 
-  async SignToken(user: Auth, email: string, roles) {
+  async SignToken(user: Auth, email: string) {
     const payload = {
       sub: user.id,
       email: email,
-      roles: roles,
     };
 
     const secret = this.config.get('JWT_SECRET');
@@ -197,18 +192,3 @@ export class AuthService {
     }
   }
 }
-
-// @Injectable()
-// export class AdminGuard implements CanActivate {
-//   canActivate(context: ExecutionContext): boolean | Promise<boolean> {
-//     const request = context.switchToHttp().getRequest();
-//     const user = request.user;
-//     return user.isAdmin;
-//   }
-// }
-
-// @Controller('/products')
-// @UseGuards(AdminGuard)
-// export class ProductController {
-//   // controller methods go here
-// }
