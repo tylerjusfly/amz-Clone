@@ -8,8 +8,8 @@ export function isSeller(user: Auth) {
   return user.roles.some((role) => role.name === 'seller');
 }
 
-export function isOwnerOrAdmin(user: Auth, product) {
-  return user.id === product.userId || user.roles.some((role) => role.name === 'admin');
+export function isOwnerOrAdmin(user: Auth, id: number) {
+  return user.id === id || user.roles.some((role) => role.name === 'admin');
 }
 
 export function isOwner(user: Auth, id) {

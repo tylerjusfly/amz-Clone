@@ -141,7 +141,7 @@ export class ProductService {
         return { type: 'Error', message: 'Invalid Product' };
       }
 
-      if (!isOwnerOrAdmin(user, product)) {
+      if (!isOwnerOrAdmin(user, product.userId)) {
         return { type: 'Unauthorized', message: 'Owner or Admin Access Only' };
       }
 
@@ -219,7 +219,7 @@ export class ProductService {
   }
 
   //Delete a Category
-  async removeCategory(categoryid) {
+  async removeCategory(categoryid: number) {
     try {
       //Find all Product with this category,
       // Set category to "deleted", this will let user re assign its product to another category
@@ -240,7 +240,7 @@ export class ProductService {
       await this.productRepository.save(products);
 
       // Delete the data
-      const result = await this.productCategoryRepository.remove(data);
+      await this.productCategoryRepository.remove(data);
 
       return { type: 'Success', message: 'successfully Deleted' };
     } catch (error) {
