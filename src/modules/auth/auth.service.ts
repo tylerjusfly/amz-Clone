@@ -120,7 +120,7 @@ export class AuthService {
     const secret = this.config.get('JWT_SECRET');
 
     const Token = await this.jwt.signAsync(payload, {
-      expiresIn: '24h',
+      expiresIn: '10s',
       secret: secret,
     });
 
