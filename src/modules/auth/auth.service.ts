@@ -28,7 +28,7 @@ export class AuthService {
       //hashing password
       const hash = await argon.hash(dto.password);
 
-      let rolesToAssign = [1];
+      let rolesToAssign = [2];
 
       const roles = await this.roleRepository.findBy({ id: In(rolesToAssign) });
 
@@ -43,17 +43,19 @@ export class AuthService {
         roles,
       });
 
-      // const rolesname = user.roles.map((role) => role.name);
+      const rolesname: Array<Role> = user.roles.map((role: any) => role.name);
 
       await this.authRepository.save(user);
 
+      user.roles = rolesname;
       delete user.password;
-      delete user.roles;
 
       // //send mail
       await this.mailService.sendConfirmEmail(user.email);
 
-      return this.SignToken(user, user.email);
+      const token = await this.SignToken(user, user.email);
+
+      return { type: 'Success', access_token: token, user };
     } catch (error) {
       console.log(error);
       if (error instanceof QueryFailedError) {
@@ -71,7 +73,7 @@ export class AuthService {
     // const user = await this.authRepository.findOneBy({ email: dto.email });
     const user = await this.authRepository.findOne({
       where: { email: dto.email },
-      // relations: ['roles'],
+      relations: ['roles'],
     });
 
     //does not exist , throw execption
@@ -85,23 +87,32 @@ export class AuthService {
 
     //if correct , send back users
     // get roles Ids
-    // const rolesname = user.roles.map((role) => role.name);
+    const rolesname: Array<Role> = user.roles.map((role: any) => role.name);
 
-    // delete user.roles;
+    user.roles = rolesname;
 
-    return this.SignToken(user, user.email);
+    delete user.password;
+
+    const token = await this.SignToken(user, user.email);
+
+    return { type: 'Success', access_token: token, user };
   }
 
   async ValidateGoogleUser(email: string) {
     //find User
     const user = await this.authRepository.findOne({
       where: { email: email },
+      relations: ['roles'],
     });
 
     //if found return
 
     if (user) {
-      return this.SignToken(user, user.email);
+      const rolesname: Array<Role> = user.roles.map((role: any) => role.name);
+
+      user.roles = rolesname;
+      const token = await this.SignToken(user, user.email);
+      return { type: 'Success', access_token: token, user };
     }
 
     //else Create
@@ -124,7 +135,7 @@ export class AuthService {
       secret: secret,
     });
 
-    return { type: 'Success', access_token: Token, user };
+    return Token;
   }
 
   async createRoles(name: string, createdBy: string) {
