@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './modules/auth/auth.module';
 import { UserModule } from './modules/user/user.module';
@@ -8,6 +8,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { config } from './database/orm.config';
 import { PassportModule } from '@nestjs/passport';
 import { AppController } from './app.controller';
+
+import { RequestLoggerMiddleware } from './middleware/request-logger';
 
 //import module here
 @Module({
@@ -24,8 +26,10 @@ import { AppController } from './app.controller';
   ],
   controllers: [AppController],
 })
-export class AppModule {}
-
-//global file similar to react where we have app.js , main.js
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer): void {
+    consumer.apply(RequestLoggerMiddleware).forRoutes('*');
+  }
+}
 
 //ConfigModule.forRoot({}) /*Loading Dotenv into app  */,
