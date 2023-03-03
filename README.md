@@ -8,13 +8,13 @@ A short description of the motivation behind the creation and maintenance of the
 
 ## Code style
 
+[![js-standard-style](https://img.shields.io/badge/code%20style-standard-brightgreen.svg?style=flat)](https://github.com/feross/standard)
+
 Error Messages must be like this:
 
 return { type: 'Error', message: message here };
 
 return { type: 'Success', message: message here };
-
-[![js-standard-style](https://img.shields.io/badge/code%20style-standard-brightgreen.svg?style=flat)](https://github.com/feross/standard)
 
 ## Screenshots
 

@@ -46,6 +46,7 @@ export class ProductController {
   }
 
   /**ADMINN FUNCTIONS */
+  @UseGuards(JwtGuard)
   @Post('category/create')
   CreateCategory(@Body() dto: ProductCategory) {
     return this.productService.createProductCategory(dto);
