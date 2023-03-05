@@ -58,8 +58,8 @@ export class ProductController {
   @Roles(RoleName.ADMIN)
   @UseGuards(JwtGuard, RoleGuard)
   @Get('category/all')
-  getAllCategories(@GetUser() user: Auth, @Query() params) {
-    return this.productService.getAllProductCategories(params, user);
+  getAllCategories(@GetUser() user: Auth) {
+    return this.productService.getAllProductCategories(user);
   }
 
   @Roles(RoleName.ADMIN)

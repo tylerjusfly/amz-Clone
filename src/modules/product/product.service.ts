@@ -219,17 +219,11 @@ export class ProductService {
     }
   }
 
-  async getAllProductCategories(params: PaginationInterface, user: Auth) {
+  async getAllProductCategories(user: Auth) {
     try {
       const categoriesQuery = this.productCategoryRepository.createQueryBuilder('categories');
 
-      const page = +params.page - 1;
-
-      let productCategories = await categoriesQuery
-        .offset(page * +params.limit)
-        .limit(+params.limit)
-        .orderBy('categories.createdAt', 'DESC')
-        .getMany();
+      let productCategories = await categoriesQuery.orderBy('categories.createdAt', 'DESC').getMany();
 
       //Get count of products
       const total = await categoriesQuery.getCount();
@@ -237,9 +231,6 @@ export class ProductService {
       return {
         type: 'Success',
         result: productCategories,
-        totalPages: Math.ceil(total / params.limit),
-        itemsPerPage: params.limit,
-        currentPage: params.page,
         totalItems: total,
       };
     } catch (error) {
