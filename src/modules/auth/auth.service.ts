@@ -53,9 +53,9 @@ export class AuthService {
       // //send mail
       await this.mailService.sendConfirmEmail(user.email);
 
-      const token = await this.SignToken(user, user.email);
+      const { token, expiresIn } = await this.SignToken(user, user.email);
 
-      return { type: 'Success', access_token: token, user };
+      return { type: 'Success', result: { access_token: token, expiresIn, user } };
     } catch (error) {
       console.log(error);
       if (error instanceof QueryFailedError) {
@@ -70,7 +70,6 @@ export class AuthService {
 
   async Login(dto: AuthDto) {
     // find user By Email
-    // const user = await this.authRepository.findOneBy({ email: dto.email });
     const user = await this.authRepository.findOne({
       where: { email: dto.email },
       relations: ['roles'],
@@ -93,9 +92,9 @@ export class AuthService {
 
     delete user.password;
 
-    const token = await this.SignToken(user, user.email);
+    const { token, expiresIn } = await this.SignToken(user, user.email);
 
-    return { type: 'Success', access_token: token, user };
+    return { type: 'Success', result: { access_token: token, expiresIn, user } };
   }
 
   async ValidateGoogleUser(email: string) {
@@ -111,8 +110,9 @@ export class AuthService {
       const rolesname: Array<Role> = user.roles.map((role: any) => role.name);
 
       user.roles = rolesname;
-      const token = await this.SignToken(user, user.email);
-      return { type: 'Success', access_token: token, user };
+      const { token, expiresIn } = await this.SignToken(user, user.email);
+
+      return { type: 'Success', result: { access_token: token, expiresIn, user } };
     }
 
     //else Create
@@ -123,6 +123,7 @@ export class AuthService {
   }
 
   async SignToken(user: Auth, email: string) {
+    const expiresIn = '12h'; // expired in 2days
     const payload = {
       sub: user.id,
       email: email,
@@ -130,12 +131,12 @@ export class AuthService {
 
     const secret = this.config.get('JWT_SECRET');
 
-    const Token = await this.jwt.signAsync(payload, {
-      expiresIn: '10s',
+    const token = await this.jwt.signAsync(payload, {
+      expiresIn: expiresIn,
       secret: secret,
     });
 
-    return Token;
+    return { token, expiresIn };
   }
 
   async createRoles(name: string, createdBy: string) {

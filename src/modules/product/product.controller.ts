@@ -5,8 +5,9 @@ import { ApiParam, ApiTags } from '@nestjs/swagger';
 import { ProductCategory } from './dto/productCategory';
 import { JwtGuard } from '../auth/guard';
 import { GetUser } from '../auth/decorators';
-import { PaginationInterface } from '../../common/pagination.dto';
 import { Auth } from '../auth/auth.entity';
+import { RoleGuard, Roles } from '../auth/guard/role.guard';
+import { RoleName } from 'src/common/utils';
 
 @ApiTags('products')
 @Controller('products')
@@ -15,13 +16,13 @@ export class ProductController {
 
   //using Body decorators Gets the body from the request
   @HttpCode(HttpStatus.CREATED)
-  @UseGuards(JwtGuard) //pass user object into the request
+  @Roles(RoleName.ADMIN, RoleName.SELLER)
+  @UseGuards(JwtGuard, RoleGuard) //pass user object into the request
   @Post('/create')
   AddProduct(@GetUser() user: Auth, @Body() dto: ProductDto) {
     return this.productService.Create(dto, user.id);
   }
 
-  // @HttpCode(HttpStatus.OK)
   @Get('/all')
   @ApiParam({ name: 'page', description: 'Gets the page number' })
   @ApiParam({ name: 'limit', description: 'Gets limit per page' })
@@ -34,7 +35,8 @@ export class ProductController {
     return this.productService.findOne(id);
   }
 
-  @UseGuards(JwtGuard)
+  @Roles(RoleName.SELLER, RoleName.ADMIN)
+  @UseGuards(JwtGuard, RoleGuard)
   @Patch('edit')
   editProduct(@GetUser() user: Auth, @Query() { pid }, @Body() params) {
     return this.productService.editProduct(pid, params, user);
@@ -46,12 +48,22 @@ export class ProductController {
   }
 
   /**ADMINN FUNCTIONS */
-  @UseGuards(JwtGuard)
+  @Roles(RoleName.ADMIN)
+  @UseGuards(JwtGuard, RoleGuard)
   @Post('category/create')
   CreateCategory(@Body() dto: ProductCategory) {
     return this.productService.createProductCategory(dto);
   }
 
+  @Roles(RoleName.ADMIN)
+  @UseGuards(JwtGuard, RoleGuard)
+  @Get('category/all')
+  getAllCategories(@GetUser() user: Auth, @Query() params) {
+    return this.productService.getAllProductCategories(params, user);
+  }
+
+  @Roles(RoleName.ADMIN)
+  @UseGuards(JwtGuard, RoleGuard)
   @Delete('category/delete')
   removeCategory(@Query() { cid }) {
     return this.productService.removeCategory(cid);

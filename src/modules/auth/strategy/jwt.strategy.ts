@@ -26,7 +26,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
       email: user.email,
       bitconWallet: user.bitconWallet,
       bio: user.bio,
-      roles: user.roles,
+      roles: user.roles.map((role) => role.name),
     };
 
     return transformedUser;

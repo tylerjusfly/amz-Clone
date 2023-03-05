@@ -8,7 +8,8 @@ import { ProductCategory } from './dto/productCategory';
 import { Product } from './entity/product.entity';
 import { ProductCategoryDb } from './entity/productcategory.entity';
 import { PaginationInterface } from '../../common/pagination.dto';
-import { isAdmin, isOwnerOrAdmin } from '../auth/decorators/checkAuth';
+import { isAdmin, isOwner, isOwnerOrAdmin } from '../auth/decorators/checkAuth';
+import { Auth } from '../auth/auth.entity';
 
 @Injectable()
 export class ProductService {
@@ -141,8 +142,8 @@ export class ProductService {
         return { type: 'Error', message: 'Invalid Product' };
       }
 
-      if (!isOwnerOrAdmin(user, product.userId)) {
-        return { type: 'Unauthorized', message: 'Owner or Admin Access Only' };
+      if (!isOwner(user, product.userId)) {
+        return { type: 'Unauthorized', message: 'Owner Can Only edit' };
       }
 
       product.name = params.name;
@@ -213,6 +214,34 @@ export class ProductService {
       const productCategory = await this.productCategoryRepository.save({ name: dto.name, slug: slugify });
 
       return { type: 'Success', message: 'successfully Created', productCategory };
+    } catch (error) {
+      return { type: 'Error', message: error.message };
+    }
+  }
+
+  async getAllProductCategories(params: PaginationInterface, user: Auth) {
+    try {
+      const categoriesQuery = this.productCategoryRepository.createQueryBuilder('categories');
+
+      const page = +params.page - 1;
+
+      let productCategories = await categoriesQuery
+        .offset(page * +params.limit)
+        .limit(+params.limit)
+        .orderBy('categories.createdAt', 'DESC')
+        .getMany();
+
+      //Get count of products
+      const total = await categoriesQuery.getCount();
+
+      return {
+        type: 'Success',
+        result: productCategories,
+        totalPages: Math.ceil(total / params.limit),
+        itemsPerPage: params.limit,
+        currentPage: params.page,
+        totalItems: total,
+      };
     } catch (error) {
       return { type: 'Error', message: error.message };
     }

@@ -29,3 +29,8 @@ export const toTitleCase = (str): string => {
 export function paginate(array, pageLimit, pageNumber) {
   return array.slice(pageLimit * (pageNumber - 1), pageLimit * pageNumber);
 }
+
+export const RoleName = {
+  ADMIN: 'admin',
+  SELLER: 'seller',
+};
